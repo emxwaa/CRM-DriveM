@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@drivem/ui",
+  "exports": "./src/index.tsx",
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.3"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@drivem/domain",
+  "exports": "./src/identity.ts"
+}

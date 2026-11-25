@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@drivem/worker",
+  "exports": "./src/jobs.ts",
+  "dependencies": {
+    "@drivem/config": "workspace:*",
+    "@drivem/db": "workspace:*",
+    "bullmq": "6.7.10",
+    "ioredis": "5.11.1"
+  }
+}

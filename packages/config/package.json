@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@drivem/config",
+  "exports": "./src/index.ts"
+}

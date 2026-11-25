@@ -1,0 +1,4 @@
+*
+!*.Dockerfile
+!postgres-init.sh
+!auth.conf

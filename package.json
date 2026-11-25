@@ -1,0 +1,45 @@
+{
+  "name": "drivem-crm",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node scripts/run-service.mjs dev",
+    "worker": "node scripts/run-service.mjs worker",
+    "build": "pnpm --filter @drivem/web build",
+    "start": "node scripts/run-service.mjs start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "next typegen apps/web && tsc -p tsconfig.json && tsc -p apps/web/tsconfig.json",
+    "test": "node --import tsx --test tests/unit.test.ts",
+    "test:integration": "node --env-file=.env.test --import tsx --test tests/integration.test.ts",
+    "env:init": "node scripts/init-env.mjs",
+    "infra:up": "docker compose -f infra/compose.yml --env-file .env up -d --build --wait --wait-timeout 120",
+    "infra:down": "docker compose -f infra/compose.yml --env-file .env down",
+    "db:migrate": "node --env-file=.env --import tsx packages/db/migrate.ts",
+    "owner:create": "node --env-file=.env --import tsx scripts/create-owner.ts",
+    "queue:smoke": "node --env-file=.env --import tsx apps/worker/src/smoke.ts",
+    "infra:test:up": "docker compose -f infra/compose.yml --env-file .env.test up -d --build --wait --wait-timeout 120",
+    "infra:test:down": "docker compose -f infra/compose.yml --env-file .env.test down",
+    "db:migrate:test": "node --env-file=.env.test --import tsx packages/db/migrate.ts",
+    "build:test": "node scripts/build-test.mjs",
+    "test:bundle": "node --env-file=.env.test scripts/check-client-bundle.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "eslint": "9.39.4",
+    "playwright-core": "1.65.1",
+    "eslint-config-next": "16.4.6",
+    "next": "16.4.6",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "@drivem/config": "workspace:*",
+    "@drivem/db": "workspace:*",
+    "@drivem/domain": "workspace:*",
+    "@drivem/worker": "workspace:*",
+    "@supabase/supabase-js": "2.119.2",
+    "postgres": "3.4.9"
+  }
+}

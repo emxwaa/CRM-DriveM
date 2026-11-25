@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@drivem/db",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "postgres": "3.4.9"
+  }
+}

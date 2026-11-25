@@ -1,0 +1,72 @@
+name: drivem-${DRIVEM_ENV:?run pnpm env:init}
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: postgres.Dockerfile
+    environment:
+      POSTGRES_DB: drivem
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      WEB_DB_PASSWORD: ${WEB_DB_PASSWORD:?required}
+      WORKER_DB_PASSWORD: ${WORKER_DB_PASSWORD:?required}
+      GOTRUE_DB_PASSWORD: ${GOTRUE_DB_PASSWORD:?required}
+    ports:
+      - "127.0.0.1:${LOCAL_POSTGRES_PORT:?required}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "drivem"]
+      interval: 3s
+      timeout: 3s
+      retries: 25
+  redis:
+    image: redis:7.4.8-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "127.0.0.1:${LOCAL_REDIS_PORT:?required}:6379"
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  auth:
+    image: supabase/gotrue:v2.188.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://127.0.0.1:${LOCAL_AUTH_PORT:?required}/auth/v1
+      GOTRUE_SITE_URL: http://127.0.0.1:3000
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://crm_auth:${GOTRUE_DB_PASSWORD:?required}@postgres:5432/drivem?sslmode=disable&search_path=auth
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_DISABLE_SIGNUP: "true"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "false"
+      GOTRUE_JWT_SECRET: ${GOTRUE_JWT_SECRET:?required}
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED: "true"
+      GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL: 10
+      GOTRUE_LOG_LEVEL: error
+  auth-gateway:
+    build:
+      context: .
+      dockerfile: auth-gateway.Dockerfile
+    depends_on:
+      - auth
+    ports:
+      - "127.0.0.1:${LOCAL_AUTH_PORT:?required}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-Y", "off", "-qO", "/dev/null", "http://127.0.0.1:8080/auth/v1/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 25
+volumes:
+  postgres:
+  redis:
